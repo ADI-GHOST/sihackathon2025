@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Portal</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f9;
+      color: #333;
+    }
+    header {
+      background: linear-gradient(90deg, #0073e6, #005bb5);
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+      font-size: 26px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .login-box {
+      width: 360px;
+      margin: 120px auto;
+      padding: 35px;
+      background: #fff;
+      box-shadow: 0px 8px 20px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      text-align: center;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    .login-box input {
+      width: 90%;
+      padding: 12px;
+      margin: 12px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.3s;
+    }
+    .login-box input:focus { border: 1px solid #0073e6; }
+    .login-box button {
+      width: 95%;
+      padding: 12px;
+      background: #0073e6;
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+    .login-box button:hover { background: #005bb5; }
+    #dashboard { display: none; animation: fadeIn 0.8s ease-in-out; }
+    nav {
+      display: flex;
+      background: #0073e6;
+      position: sticky;
+      top: 0; z-index: 100;
+      box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+    }
+    nav button {
+      flex: 1; padding: 15px;
+      background: transparent; border: none;
+      color: white; cursor: pointer; font-weight: bold;
+      transition: background 0.3s;
+    }
+    nav button:hover { background: rgba(255,255,255,0.2); }
+    section { padding: 30px; max-width: 950px; margin: auto; display: none; }
+    h2 { text-align: center; color: #0073e6; margin-bottom: 20px; }
+    .card {
+      background: #fff; padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0px 6px 16px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+      transition: transform 0.2s;
+    }
+    .card:hover { transform: translateY(-5px); }
+    #reader {
+      width: 350px; margin: auto;
+      border: 2px solid #0073e6;
+      border-radius: 12px; overflow: hidden;
+    }
+    .qr-output { text-align: center; margin-top: 15px; font-weight: bold; color: green; }
+    table {
+      width: 100%; border-collapse: collapse;
+      background: #fff; border-radius: 10px; overflow: hidden;
+    }
+    table th, table td { border: 1px solid #ddd; padding: 14px; text-align: center; }
+    table th { background: #0073e6; color: white; }
+    @keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+    @media(max-width: 600px) {
+      .login-box, #reader { width: 90%; }
+      nav { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>🚀 College Student Portal</header>
+
+<div id="login-screen" class="login-box">
+  <h2>Login</h2>
+  <input type="email" id="email" placeholder="Enter Email">
+  <input type="password" id="password" placeholder="Enter Password">
+  <button onclick="login()">Login</button>
+</div>
+
+<div id="dashboard">
+  <nav>
+    <button onclick="showTab('attendance')">📷 QR Attendance</button>
+    <button onclick="showTab('schedule')">📅 Schedule</button>
+    <button onclick="showTab('results')">📊 Results</button>
+    <button onclick="showTab('records')">📖 Records</button>
+  </nav>
+
+  <section id="attendance">
+    <div class="card">
+      <h2>Scan QR for Attendance</h2>
+      <div id="reader"></div>
+      <p id="qr-result" class="qr-output"></p>
+    </div>
+  </section>
+
+  <section id="schedule">
+    <div class="card">
+      <h2>Class Schedule</h2>
+      <table id="schedule-table"></table>
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="card">
+      <h2>Exam Results</h2>
+      <table id="results-table"></table>
+    </div>
+  </section>
+
+  <section id="records">
+    <div class="card">
+      <h2>Attendance Records</h2>
+      <table id="attendance-table"></table>
+    </div>
+  </section>
+</div>
+
+<script>
+  let currentUser = null;
+
+  function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      if(!email || !password) { alert("Please enter both Email and Password"); return; }
+
+      fetch("/student/login", {
+          method: "POST",
+          headers: {"Content-Type": "application/x-www-form-urlencoded"},
+          body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+      }).then(res => res.json()).then(data => {
+          if(data.status === "success") {
+              currentUser = data.user;
+              document.getElementById("login-screen").style.display = "none";
+              document.getElementById("dashboard").style.display = "block";
+              showTab('attendance');
+              startScanner();
+          } else {
+              alert(data.message);
+          }
+      });
+  }
+
+  function showTab(tab){
+      document.querySelectorAll("section").forEach(sec => sec.style.display="none");
+      document.getElementById(tab).style.display = "block";
+
+      if(tab==="schedule") fetchSchedule();
+      if(tab==="results") fetchResults();
+      if(tab==="records") fetchAttendance();
+  }
+
+  function startScanner(){
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" }, 
+      { fps: 10, qrbox: 250 }, 
+      (decodedText) => {
+
+        // 🔴 REMOVE showing raw QR text
+        // document.getElementById("qr-result").innerText = "📡 QR Scanned: " + decodedText;
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            fetch("/student/mark_attendance", {
+              method:"POST",
+              headers:{"Content-Type":"application/json"},
+              body: JSON.stringify({
+                student_id: currentUser.student_id,
+                qr_code: decodedText,  // still send QR data to backend
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+              })
+            })
+            .then(res => res.json())
+            .then(data => {
+              // ✅ Show only backend response
+              document.getElementById("qr-result").innerText = "✅ " + data.message;
+            })
+            .catch(err => {
+              document.getElementById("qr-result").innerText = "❌ Error: " + err;
+            });
+          }, () => {
+            alert("⚠️ Location access denied. Attendance not marked.");
+          });
+        } else {
+          alert("⚠️ Geolocation not supported in this browser.");
+        }
+
+        html5QrCode.stop();
+    });
+}
+
+
+
+  function fetchSchedule(){
+      fetch(`/student/get_schedule`)
+      .then(res => res.json())
+      .then(data => {
+          const table = document.getElementById("schedule-table");
+          table.innerHTML = "<tr><th>Day</th><th>Time</th><th>Subject</th></tr>";
+          data.forEach(row => {
+              table.innerHTML += `<tr><td>${row.day}</td><td>${row.time}</td><td>${row.subject}</td></tr>`;
+          });
+      });
+  }
+
+  function fetchResults(){
+      fetch(`/student/get_results/${currentUser.student_id}`)
+      .then(res => res.json())
+      .then(data => {
+          const table = document.getElementById("results-table");
+          table.innerHTML = "<tr><th>Subject</th><th>Marks</th><th>Grade</th></tr>";
+          data.forEach(row => {
+              table.innerHTML += `<tr><td>${row.subject}</td><td>${row.marks}</td><td>${row.grade}</td></tr>`;
+          });
+      });
+  }
+
+  function fetchAttendance(){
+      fetch(`/student/get_attendance/${currentUser.student_id}`)
+      .then(res => res.json())
+      .then(data => {
+          const table = document.getElementById("attendance-table");
+          table.innerHTML = "<tr><th>Date</th><th>Status</th><th>Latitude</th><th>Longitude</th></tr>";
+          data.forEach(row => {
+              const date = new Date(row.timestamp).toLocaleString();
+              table.innerHTML += `<tr><td>${date}</td><td>Present</td><td>${row.latitude || '-'}</td><td>${row.longitude || '-'}</td></tr>`;
+          });
+      });
+  }
+</script>
+
+</body>
+</html>

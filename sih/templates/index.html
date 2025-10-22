@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hackathon Portal</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg, #f0f8ff, #e6f2ff);
+      color: #333;
+      text-align: center;
+    }
+
+    header {
+      background: linear-gradient(90deg, #0073e6, #005bb5);
+      color: white;
+      padding: 30px;
+      font-size: 32px;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    header span {
+      margin-left: 10px;
+      font-size: 34px;
+    }
+
+    p {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    .portal-container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 50px auto;
+      flex-wrap: wrap;
+      max-width: 1000px;
+    }
+
+    .portal-card {
+      background: #fff;
+      width: 250px;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .portal-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.2);
+    }
+
+    .portal-card h3 {
+      margin: 15px 0;
+      font-size: 22px;
+      color: #0073e6;
+    }
+
+    .portal-card a {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #0073e6;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+
+    .portal-card a:hover {
+      background: #005bb5;
+    }
+
+    /* Responsive */
+    @media(max-width: 768px) {
+      .portal-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  Welcome to Hackathon Portal
+</header>
+
+<p>Select your portal below:</p>
+
+<div class="portal-container">
+  <div class="portal-card">
+    <h3>👨‍💼 Admin Portal</h3>
+    <a href="/admin">Enter</a>
+  </div>
+  <div class="portal-card">
+    <h3>🎓 Student Portal</h3>
+    <a href="/student">Enter</a>
+  </div>
+  <div class="portal-card">
+    <h3>👩‍🏫 Teacher Portal</h3>
+    <a href="/teacher">Enter</a>
+  </div>
+</div>
+
+</body>
+</html>
