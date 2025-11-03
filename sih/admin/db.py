@@ -8,12 +8,13 @@ def create_connection():
             host='localhost', # Replace with your host
             database='portal',
             user='root', # Replace with your username
-            password='aditya',
+            password='',
             auth_plugin='mysql_native_password'
               
         )
     if connection.is_connected():
             return connection
   
+
 
 
