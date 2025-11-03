@@ -8,7 +8,7 @@ def create_connection():
             host='localhost',
             database='portal',
             user='root',
-            password='aditya',
+            password='',
             auth_plugin='mysql_native_password'
         )
         if connection.is_connected():
@@ -16,5 +16,6 @@ def create_connection():
     except Error as e:
         print(f"Error while connecting to MySQL: {e}")
         return None
+
 
 
