@@ -15,7 +15,7 @@ student_bp = Blueprint(
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="aditya",
+    password="",
     database="adm"
 )
 cursor = db.cursor(dictionary=True)
@@ -123,4 +123,5 @@ def get_attendance(student_id):
         (student_id,)
     )
     return jsonify(cursor.fetchall())
+
 
